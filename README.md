@@ -1,9 +1,10 @@
 # Projeto: Oficina do Junior
+Site de oficina
 
 ## Tecnologias utilizadas:
-- **Java**: implementação da lógica de negócio, 
-- **PostgreSQL**: banco de dados (gerenciado via DBeaver), 
-- **JavaScript**: interação e funcionalidades no front-end.
+- **Java**: Implementação da lógica de negócio.
+- **PostgreSQL**: Banco de dados (gerenciado via DBeaver).
+- **JavaScript**: Interação e funcionalidades no front-end.
 
 ## Funcionalidades:
 - Cadastro e gerenciamento de clientes.
