@@ -1,4 +1,4 @@
-# Projeto: Oficina do Junior
+# Projeto: Oficina do Ju.nior
 Site de oficina
 
 ## Tecnologias utilizadas:
