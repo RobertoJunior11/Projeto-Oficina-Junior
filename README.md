@@ -1,5 +1,5 @@
-# Projeto: Oficina do Ju.nior
-Site de oficina
+# Projeto: Oficina do Junior
+Site de oficina.
 
 ## Tecnologias utilizadas:
 - **Java**: Implementação da lógica de negócio.
