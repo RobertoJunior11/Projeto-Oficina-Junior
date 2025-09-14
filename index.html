@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Oficina de Veículos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🚗 Oficina do Junior</h1>
+    </header>
+
+    <section>
+      <h2>Cadastrar / Editar Veículo</h2>
+
+      <form id="veiculoForm">
+        <input type="hidden" id="veiculoId" />
+
+        <label for="veiculo">
+          Nome do Veículo:
+          <input type="text" id="veiculo" placeholder="Ex: Fusca" required />
+        </label>
+
+        <label for="marca">
+          Marca:
+          <input type="text" id="marca" placeholder="Ex: Volkswagen" required />
+        </label>
+
+        <label for="ano">
+          Ano:
+          <input type="number" id="ano" min="1900" max="2099" placeholder="Ex: 2025" required />
+        </label>
+
+        <button type="submit">Salvar Veículo</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Veículos Cadastrados</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Veículo</th>
+            <th>Marca</th>
+            <th>Ano</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaVeiculos"></tbody>
+      </table>
+
+      <div id="paginacao">
+        <button id="anterior">⬅ Anterior</button>
+        <span id="paginaAtual">1</span>
+        <button id="proximo">Próximo ➡</button>
+      </div>
+    </section>
+
+    <script src="./js/scripts.js"></script>
+  </body>
+</html>
