@@ -4,7 +4,6 @@ Site de oficina.
 ## Tecnologias utilizadas:
 - **Java**: Implementação da lógica de negócio.
 - **PostgreSQL**: Banco de dados (gerenciado via DBeaver).
-- **JavaScript**: Interação e funcionalidades no front-end.
 
 ## Funcionalidades:
 - Cadastro e gerenciamento de clientes.
