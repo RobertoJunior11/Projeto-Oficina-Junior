@@ -18,4 +18,5 @@ public class VeiculoResponse {
     private Integer ano;
     private LocalDateTime dtCriacao;
     private LocalDateTime dtAtualizacao;
+    private ProprietarioResponse proprietario;
 }

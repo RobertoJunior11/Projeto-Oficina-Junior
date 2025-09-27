@@ -1,26 +1,32 @@
 package com.impacta.oficina.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
-
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;
 
 import static jakarta.persistence.GenerationType.SEQUENCE;
-import static java.time.LocalDateTime.now;
 
 @Data
 @Entity
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldNameConstants
 @Table(name = "TB_VEICULO")
-public class VeiculoEntity {
+@EqualsAndHashCode(callSuper = true)
+public class VeiculoEntity extends GenericEntity {
 
     @Id
     @GeneratedValue(strategy = SEQUENCE)
@@ -36,28 +42,8 @@ public class VeiculoEntity {
     @Column(name = "ANO", nullable = false)
     private Integer ano;
 
-    @Column(name = "DT_CRIACAO", updatable = false)
-    private LocalDateTime dtCriacao;
-
-    @Column(name = "DT_ATUALIZACAO")
-    private LocalDateTime dtAtualizacao;
-
-    /**
-     * Define automaticamente os timestamps de criação e atualização
-     * quando uma nova entidade é persistida no banco de dados.
-     */
-    @PrePersist
-    protected void onCreate() {
-        dtCriacao = now();
-        dtAtualizacao = now();
-    }
-
-    /**
-     * Atualiza automaticamente o timestamp de atualização
-     * sempre que a entidade for modificada no banco de dados.
-     */
-    @PreUpdate
-    protected void onUpdate() {
-        dtAtualizacao = now();
-    }
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "ID_PROPRIETARIO")
+    private ProprietarioEntity proprietario;
 }

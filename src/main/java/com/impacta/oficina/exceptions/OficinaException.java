@@ -21,7 +21,7 @@ public class OficinaException extends RuntimeException {
 
     private static final long serialVersionUID = -1811148676250520727L;
 
-    private static final String DEFAULT_MESSAGE = "Dado ja existe no sistema";
+    private static final String DEFAULT_MESSAGE = "Dado j� existe no sistema";
 
     @JsonIgnore
     private HttpStatus httpStatusCode;

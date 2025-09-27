@@ -1,5 +1,6 @@
 package com.impacta.oficina.assembler;
 
+import com.impacta.oficina.domain.entity.ProprietarioEntity;
 import com.impacta.oficina.domain.entity.VeiculoEntity;
 import com.impacta.oficina.domain.request.VeiculoRequest;
 import com.impacta.oficina.domain.response.VeiculoResponse;
@@ -20,7 +21,17 @@ public class VeiculoAssembler {
      * @return entidade do carro
      */
     public VeiculoEntity fromRequestToEntity(VeiculoRequest request) {
-        return modelMapper.map(request, VeiculoEntity.class);
+        VeiculoEntity entity = modelMapper.map(request, VeiculoEntity.class);
+        
+        // Mapear proprietário se fornecido
+        if (request.getProprietario() != null) {
+            ProprietarioEntity proprietario = ProprietarioEntity.builder()
+                    .id(request.getProprietario())
+                    .build();
+            entity.setProprietario(proprietario);
+        }
+        
+        return entity;
     }
 
     /**
@@ -50,7 +61,7 @@ public class VeiculoAssembler {
             entity.setMarca(request.getMarca());
         }
 
-        if(request.getAno() != null) {
+        if (request.getAno() != null) {
             entity.setAno(request.getAno());
         }
 

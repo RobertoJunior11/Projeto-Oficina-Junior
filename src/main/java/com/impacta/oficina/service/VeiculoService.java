@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.impacta.oficina.domain.entity.VeiculoEntity.Fields.id;
 import static com.impacta.oficina.domain.entity.VeiculoEntity.Fields.marca;
@@ -101,6 +102,17 @@ public class VeiculoService {
     }
 
     /**
+     * Busca uma entidade de veiculo pelo ID.
+     *
+     * @param id identificador do veiculo
+     * @return entidade do veiculo encontrado
+     * @throws OficinaException se o veiculo não for encontrado
+     */
+    public VeiculoEntity getVeiculoEntity(Long id) {
+        return fingById(id);
+    }
+
+    /**
      * Lista todos os veiculos com paginação e filtros opcionais.
      * Permite filtrar por id, nome do veiculo ou marca.
      *
@@ -116,7 +128,7 @@ public class VeiculoService {
         List<VeiculoResponse> response = veiculos
                 .stream()
                 .map(assembler::fromEntityToResponse)
-                .toList();
+                .collect(Collectors.toList());
 
         return new PageImpl<>(response, pageable, veiculos.getTotalElements());
     }

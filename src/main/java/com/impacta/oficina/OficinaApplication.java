@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OficinaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OficinaApplication.class, args);
+        SpringApplication.run(com.impacta.oficina.OficinaApplication.class, args);
     }
 
 }
