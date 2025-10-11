@@ -152,7 +152,7 @@ public class VeiculoService {
     /**
      * Busca um veiculo pelo ID, lançando exceção se não encontrado.
      */
-    private VeiculoEntity fingById(Long id) {
+    protected VeiculoEntity fingById(Long id) {
         log.debug("Buscando veiculo no banco de dados - ID: {}", id);
 
         return repository.findById(id)

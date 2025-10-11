@@ -8,6 +8,7 @@ import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import static java.time.LocalDateTime.now;
 @MappedSuperclass
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldNameConstants
 public class GenericEntity {
 
     @Column(name = "DT_CRIACAO", nullable = false, updatable = false)
