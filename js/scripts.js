@@ -1,13 +1,26 @@
 // URLs das APIs
 const PROPRIETARIO_API_URL = "http://localhost:8080/proprietario";
 const VEICULO_API_URL = "http://localhost:8080/veiculo";
+const REVISAO_API_URL = "http://localhost:8080/revisao";
 
 // Variáveis de paginação
 let paginaProprietarios = 0;
 let paginaVeiculos = 0;
+let paginaRevisoes = 0;
 
-// Contador para IDs únicos dos veículos no formulário
-let veiculoCounter = 0;
+// Tipos de revisão (hardcoded por enquanto)
+const TIPOS_REVISAO = [
+  { id: 1, descricao: "Troca de Óleo", valor: 120.0 },
+  { id: 2, descricao: "Alinhamento e Balanceamento", valor: 150.0 },
+  { id: 3, descricao: "Troca de Pneu", valor: 250.0 },
+  { id: 4, descricao: "Revisão Completa (óleo, filtros, velas)", valor: 400.0 },
+  { id: 5, descricao: "Troca de Filtro de Ar", valor: 50.0 },
+  { id: 6, descricao: "Troca de Filtro de Óleo", valor: 60.0 },
+  { id: 7, descricao: "Troca de Bateria", valor: 350.0 },
+  { id: 8, descricao: "Troca de Velas de Ignição", valor: 80.0 },
+  { id: 9, descricao: "Troca de Limpador de Parabrisa", valor: 30.0 },
+  { id: 10, descricao: "Inspeção Técnica", valor: 100.0 },
+];
 
 // Função para alternar entre abas
 function showTab(tabName) {
@@ -31,6 +44,10 @@ function showTab(tabName) {
   } else if (tabName === "veiculos") {
     carregarVeiculos();
     carregarProprietariosParaVeiculo();
+  } else if (tabName === "revisoes") {
+    carregarRevisoes();
+    carregarVeiculosParaRevisao();
+    inicializarTiposRevisao();
   }
 }
 
@@ -340,6 +357,255 @@ document.getElementById("anteriorVeiculos").addEventListener("click", () => {
 document.getElementById("proximoVeiculos").addEventListener("click", () => {
   paginaVeiculos++;
   carregarVeiculos();
+});
+
+// ==================== FUNCIONALIDADES DE REVISÕES ====================
+
+// Função para carregar veículos no select de revisões
+async function carregarVeiculosParaRevisao() {
+  try {
+    const resposta = await fetch(`${VEICULO_API_URL}?page=0&size=1000`);
+    if (!resposta.ok) {
+      throw new Error("Erro ao carregar veículos");
+    }
+
+    const dados = await resposta.json();
+    const veiculos = dados.content;
+    const select = document.getElementById("veiculoRevisao");
+
+    // Limpar opções existentes (exceto a primeira)
+    select.innerHTML = '<option value="">Selecione um veículo</option>';
+
+    veiculos.forEach((veiculo) => {
+      const option = document.createElement("option");
+      option.value = veiculo.id;
+      option.textContent = `${veiculo.veiculo} - ${veiculo.marca} (${veiculo.ano})`;
+      select.appendChild(option);
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar veículos:", erro);
+  }
+}
+
+// Função para inicializar tipos de revisão
+function inicializarTiposRevisao() {
+  const container = document.getElementById("tiposRevisaoContainer");
+  container.innerHTML = "";
+
+  TIPOS_REVISAO.forEach((tipo) => {
+    const div = document.createElement("div");
+    div.className = "tipo-revisao-item";
+    div.innerHTML = `
+      <input type="checkbox" id="tipo-${tipo.id}" value="${tipo.id}">
+      <label for="tipo-${tipo.id}">${tipo.descricao}</label>
+      <span class="valor">R$ ${tipo.valor.toFixed(2)}</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Função para coletar tipos de revisão selecionados
+function coletarTiposRevisaoSelecionados() {
+  const checkboxes = document.querySelectorAll('#tiposRevisaoContainer input[type="checkbox"]:checked');
+  return Array.from(checkboxes).map((cb) => parseInt(cb.value));
+}
+
+// Função para calcular valor total dos tipos selecionados
+function calcularValorTotal() {
+  const tiposSelecionados = coletarTiposRevisaoSelecionados();
+  return tiposSelecionados.reduce((total, tipoId) => {
+    const tipo = TIPOS_REVISAO.find((t) => t.id === tipoId);
+    return total + (tipo ? tipo.valor : 0);
+  }, 0);
+}
+
+// Event listener para o formulário de revisões
+document.getElementById("revisaoForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const id = document.getElementById("revisaoId").value;
+  const veiculoId = document.getElementById("veiculoRevisao").value;
+  const descricao = document.getElementById("descricaoRevisao").value;
+  const tiposSelecionados = coletarTiposRevisaoSelecionados();
+  const concluida = document.getElementById("concluidaRevisao").checked;
+
+  if (tiposSelecionados.length === 0) {
+    alert("Selecione pelo menos um tipo de revisão");
+    return;
+  }
+
+  const revisaoData = {
+    id: parseInt(id) || undefined,
+    descricao: descricao,
+    tiposRevisao: tiposSelecionados,
+    concluida: concluida,
+    veiculo: { id: parseInt(veiculoId) },
+  };
+
+  try {
+    let resposta;
+    if (id) {
+      // Atualizar revisão existente
+      resposta = await fetch(`${REVISAO_API_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(revisaoData),
+      });
+    } else {
+      // Criar nova revisão
+      resposta = await fetch(REVISAO_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(revisaoData),
+      });
+    }
+
+    if (!resposta.ok) {
+      const erro = await resposta.json();
+      throw new Error(erro.message || "Erro ao salvar revisão");
+    }
+
+    alert("Revisão salva com sucesso!");
+    resetarFormularioRevisao();
+    carregarRevisoes();
+  } catch (erro) {
+    alert(`Erro ao salvar revisão: ${erro.message}`);
+  }
+});
+
+// Função para resetar formulário de revisões
+function resetarFormularioRevisao() {
+  document.getElementById("revisaoId").value = "";
+  document.getElementById("veiculoRevisao").value = "";
+  document.getElementById("descricaoRevisao").value = "";
+  document.getElementById("concluidaRevisao").checked = false;
+
+  // Desmarcar todos os checkboxes
+  const checkboxes = document.querySelectorAll('#tiposRevisaoContainer input[type="checkbox"]');
+  checkboxes.forEach((cb) => (cb.checked = false));
+}
+
+// Função para carregar revisões
+async function carregarRevisoes() {
+  try {
+    const resposta = await fetch(`${REVISAO_API_URL}?page=${paginaRevisoes}&size=5`);
+    if (!resposta.ok) {
+      throw new Error("Erro ao carregar revisões");
+    }
+
+    const dados = await resposta.json();
+    const revisoes = dados.content;
+
+    const tabela = document.getElementById("tabelaRevisoes");
+    tabela.innerHTML = "";
+
+    if (revisoes.length === 0) {
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+          Nenhuma revisão cadastrada
+        </td>
+      `;
+      tabela.appendChild(linha);
+    } else {
+      revisoes.forEach((revisao) => {
+        const linha = document.createElement("tr");
+        const tiposTexto = revisao.tiposRevisao ? revisao.tiposRevisao.map((t) => t.descricao).join(", ") : "N/A";
+        const valorTotal = revisao.vlServico ? `R$ ${revisao.vlServico.toFixed(2)}` : "N/A";
+        const concluida = revisao.concluida ? "Sim" : "Não";
+        const statusClass = revisao.concluida ? "status-concluida" : "status-pendente";
+
+        linha.innerHTML = `
+          <td>${revisao.id}</td>
+          <td>${revisao.veiculo ? `${revisao.veiculo.veiculo} - ${revisao.veiculo.marca}` : "N/A"}</td>
+          <td>${revisao.descricao || "N/A"}</td>
+          <td>${tiposTexto}</td>
+          <td>${valorTotal}</td>
+          <td class="${statusClass}">${concluida}</td>
+          <td>
+            <button onclick="editarRevisao(${revisao.id})">Editar</button>
+            <button onclick="deletarRevisao(${revisao.id})">Excluir</button>
+          </td>
+        `;
+        tabela.appendChild(linha);
+      });
+    }
+
+    document.getElementById("paginaAtualRevisoes").innerText = paginaRevisoes + 1;
+  } catch (erro) {
+    alert(`Erro ao carregar revisões: ${erro.message}`);
+  }
+}
+
+// Função para editar revisão
+async function editarRevisao(id) {
+  try {
+    const resposta = await fetch(`${REVISAO_API_URL}/${id}`);
+    if (!resposta.ok) {
+      throw new Error("Erro ao carregar revisão");
+    }
+
+    const revisao = await resposta.json();
+    document.getElementById("revisaoId").value = revisao.id;
+    document.getElementById("veiculoRevisao").value = revisao.veiculo ? revisao.veiculo.id : "";
+    document.getElementById("descricaoRevisao").value = revisao.descricao || "";
+    document.getElementById("concluidaRevisao").checked = revisao.concluida || false;
+
+    // Marcar tipos selecionados
+    const checkboxes = document.querySelectorAll('#tiposRevisaoContainer input[type="checkbox"]');
+    checkboxes.forEach((cb) => (cb.checked = false));
+
+    if (revisao.tiposRevisao) {
+      revisao.tiposRevisao.forEach((tipo) => {
+        const checkbox = document.getElementById(`tipo-${tipo.codigo}`);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
+
+    // Scroll para o formulário
+    document.getElementById("revisaoForm").scrollIntoView({ behavior: "smooth" });
+  } catch (erro) {
+    alert(`Erro ao editar revisão: ${erro.message}`);
+  }
+}
+
+// Função para deletar revisão
+async function deletarRevisao(id) {
+  if (!confirm("Tem certeza que deseja excluir esta revisão?")) {
+    return;
+  }
+
+  try {
+    const resposta = await fetch(`${REVISAO_API_URL}/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!resposta.ok) {
+      throw new Error("Erro ao excluir revisão");
+    }
+
+    carregarRevisoes();
+    alert("Revisão excluída com sucesso!");
+  } catch (erro) {
+    alert(`Erro ao excluir revisão: ${erro.message}`);
+  }
+}
+
+// Event listeners para paginação de revisões
+document.getElementById("anteriorRevisoes").addEventListener("click", () => {
+  if (paginaRevisoes > 0) {
+    paginaRevisoes--;
+    carregarRevisoes();
+  }
+});
+
+document.getElementById("proximoRevisoes").addEventListener("click", () => {
+  paginaRevisoes++;
+  carregarRevisoes();
 });
 
 // Inicialização

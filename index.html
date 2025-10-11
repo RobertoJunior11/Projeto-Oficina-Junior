@@ -15,7 +15,59 @@
     <nav class="tabs">
       <button class="tab-button active" onclick="showTab('proprietarios')">👥 Proprietários</button>
       <button class="tab-button" onclick="showTab('veiculos')">🚗 Veículos</button>
+      <button class="tab-button" onclick="showTab('revisoes')">🔧 Revisões</button>
     </nav>
+
+    <!-- Aba Proprietários -->
+    <div id="proprietarios" class="tab-content active">
+      <section>
+        <h2>Cadastrar / Editar Proprietário</h2>
+
+        <form id="proprietarioForm">
+          <input type="hidden" id="proprietarioId" />
+
+          <label for="nome">
+            Nome:
+            <input type="text" id="nome" placeholder="Ex: João Silva" required />
+          </label>
+
+          <label for="email">
+            Email:
+            <input type="email" id="email" placeholder="Ex: joao@email.com" required />
+          </label>
+
+          <label for="telefone">
+            Telefone:
+            <input type="tel" id="telefone" placeholder="Ex: (11) 99999-9999" required />
+          </label>
+
+          <button type="submit">Salvar Proprietário</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Proprietários Cadastrados</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaProprietarios"></tbody>
+        </table>
+
+        <div id="paginacaoProprietarios">
+          <button id="anteriorProprietarios">⬅ Anterior</button>
+          <span id="paginaAtualProprietarios">1</span>
+          <button id="proximoProprietarios">Próximo ➡</button>
+        </div>
+      </section>
+    </div>
 
     <!-- Aba Veículos -->
     <div id="veiculos" class="tab-content">
@@ -76,53 +128,64 @@
       </section>
     </div>
 
-    <!-- Aba Proprietários -->
-    <div id="proprietarios" class="tab-content active">
+    <!-- Aba Revisões -->
+    <div id="revisoes" class="tab-content">
       <section>
-        <h2>Cadastrar / Editar Proprietário</h2>
+        <h2>Cadastrar / Editar Revisão</h2>
 
-        <form id="proprietarioForm">
-          <input type="hidden" id="proprietarioId" />
+        <form id="revisaoForm">
+          <input type="hidden" id="revisaoId" />
 
-          <label for="nome">
-            Nome:
-            <input type="text" id="nome" placeholder="Ex: João Silva" required />
+          <label for="veiculoRevisao">
+            Veículo:
+            <select id="veiculoRevisao" required>
+              <option value="">Selecione um veículo</option>
+            </select>
           </label>
 
-          <label for="email">
-            Email:
-            <input type="email" id="email" placeholder="Ex: joao@email.com" required />
+          <label for="descricaoRevisao">
+            Descrição do Problema:
+            <textarea id="descricaoRevisao" placeholder="Descreva o problema encontrado..." required></textarea>
           </label>
 
-          <label for="telefone">
-            Telefone:
-            <input type="tel" id="telefone" placeholder="Ex: (11) 99999-9999" required />
+          <label>
+            Tipos de Revisão:
+            <div id="tiposRevisaoContainer" class="tipos-revisao-container">
+              <!-- Tipos serão carregados dinamicamente -->
+            </div>
           </label>
 
-          <button type="submit">Salvar Proprietário</button>
+          <label for="concluidaRevisao">
+            <input type="checkbox" id="concluidaRevisao" />
+            Revisão Concluída
+          </label>
+
+          <button type="submit">Salvar Revisão</button>
         </form>
       </section>
 
       <section>
-        <h2>Proprietários Cadastrados</h2>
+        <h2>Revisões Cadastradas</h2>
 
         <table>
           <thead>
             <tr>
               <th>ID</th>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Telefone</th>
+              <th>Veículo</th>
+              <th>Descrição</th>
+              <th>Tipos</th>
+              <th>Valor</th>
+              <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="tabelaProprietarios"></tbody>
+          <tbody id="tabelaRevisoes"></tbody>
         </table>
 
-        <div id="paginacaoProprietarios">
-          <button id="anteriorProprietarios">⬅ Anterior</button>
-          <span id="paginaAtualProprietarios">1</span>
-          <button id="proximoProprietarios">Próximo ➡</button>
+        <div id="paginacaoRevisoes">
+          <button id="anteriorRevisoes">⬅ Anterior</button>
+          <span id="paginaAtualRevisoes">1</span>
+          <button id="proximoRevisoes">Próximo ➡</button>
         </div>
       </section>
     </div>
