@@ -33,8 +33,8 @@ public class GenericEntity {
     private LocalDateTime dtAtualizacao;
 
     /**
-     * Define automaticamente os timestamps de criaÃ§Ã£o e atualizaÃ§Ã£o
-     * quando uma nova entidade Ã© persistida no banco de dados.
+     * Define automaticamente os timestamps de criação e atualização
+     * quando uma nova entidade é persistida no banco de dados.
      */
     @PrePersist
     protected void onCreate() {
@@ -43,7 +43,7 @@ public class GenericEntity {
     }
 
     /**
-     * Atualiza automaticamente o timestamp de atualizaÃ§Ã£o
+     * Atualiza automaticamente o timestamp de atualização
      * sempre que a entidade for modificada no banco de dados.
      */
     @PreUpdate

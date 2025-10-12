@@ -132,6 +132,15 @@ INSERT INTO TB_REVISAO_TIPOS (ID_REVISAO, TP_REVISAO) VALUES
 (3, 'ALINHAMENTO');
 
 -- =============================================
+-- AJUSTAR SEQUÊNCIAS APÓS INSERÇÃO DE DADOS DE TESTE
+-- =============================================
+
+-- Ajustar sequências para começar após os dados de teste
+SELECT setval('SQ_PROPRIETARIO', (SELECT MAX(ID) FROM TB_PROPRIETARIO));
+SELECT setval('SQ_VEICULO', (SELECT MAX(ID) FROM TB_VEICULO));
+SELECT setval('SQ_REVISAO', (SELECT MAX(ID) FROM TB_REVISAO));
+
+-- =============================================
 -- ÍNDICES PARA PERFORMANCE
 -- =============================================
 
@@ -139,3 +148,4 @@ CREATE INDEX idx_veiculo_proprietario ON TB_VEICULO(ID_PROPRIETARIO);
 CREATE INDEX idx_revisao_veiculo ON TB_REVISAO(ID_VEICULO);
 CREATE INDEX idx_revisao_tipos_revisao ON TB_REVISAO_TIPOS(ID_REVISAO);
 CREATE INDEX idx_proprietario_email ON TB_PROPRIETARIO(DS_EMAIL);
+
