@@ -272,6 +272,24 @@ td button:nth-child(2) {
   margin-right: 8px;
 }
 
+/* Estilos para campo de data */
+#dataRevisao {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+#dataRevisao:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
 /* Estilos para paginação de revisões */
 #paginacaoRevisoes {
   margin-top: 20px;

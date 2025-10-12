@@ -48,6 +48,9 @@ function showTab(tabName) {
     carregarRevisoes();
     carregarVeiculosParaRevisao();
     inicializarTiposRevisao();
+  } else if (tabName === "agendamentos") {
+    carregarAgendamentos();
+    carregarRevisoesParaAgendamento();
   }
 }
 
@@ -437,6 +440,7 @@ document.getElementById("revisaoForm").addEventListener("submit", async function
   const revisaoData = {
     id: parseInt(id) || undefined,
     descricao: descricao,
+    dtRevisao: window.dataRevisaoEditando || null,
     tiposRevisao: tiposSelecionados,
     concluida: concluida,
     veiculo: { id: parseInt(veiculoId) },
@@ -484,6 +488,9 @@ function resetarFormularioRevisao() {
   document.getElementById("descricaoRevisao").value = "";
   document.getElementById("concluidaRevisao").checked = false;
 
+  // Limpar data armazenada em memória
+  window.dataRevisaoEditando = null;
+
   // Desmarcar todos os checkboxes
   const checkboxes = document.querySelectorAll('#tiposRevisaoContainer input[type="checkbox"]');
   checkboxes.forEach((cb) => (cb.checked = false));
@@ -506,7 +513,7 @@ async function carregarRevisoes() {
     if (revisoes.length === 0) {
       const linha = document.createElement("tr");
       linha.innerHTML = `
-        <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+        <td colspan="8" style="text-align: center; padding: 20px; color: #666;">
           Nenhuma revisão cadastrada
         </td>
       `;
@@ -516,12 +523,26 @@ async function carregarRevisoes() {
         const linha = document.createElement("tr");
         const tiposTexto = revisao.tiposRevisao ? revisao.tiposRevisao.map((t) => t.descricao).join(", ") : "N/A";
         const valorTotal = revisao.vlServico ? `R$ ${revisao.vlServico.toFixed(2)}` : "N/A";
-        const concluida = revisao.concluida ? "Sim" : "Não";
+        const concluida = revisao.concluida ? "Concluído" : "Pendente";
         const statusClass = revisao.concluida ? "status-concluida" : "status-pendente";
+
+        // Formatar data para exibição
+        let dataFormatada = "N/A";
+        if (revisao.dtRevisao) {
+          const data = new Date(revisao.dtRevisao);
+          dataFormatada = data.toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
 
         linha.innerHTML = `
           <td>${revisao.id}</td>
           <td>${revisao.veiculo ? `${revisao.veiculo.veiculo} - ${revisao.veiculo.marca}` : "N/A"}</td>
+          <td>${dataFormatada}</td>
           <td>${revisao.descricao || "N/A"}</td>
           <td>${tiposTexto}</td>
           <td>${valorTotal}</td>
@@ -554,6 +575,9 @@ async function editarRevisao(id) {
     document.getElementById("veiculoRevisao").value = revisao.veiculo ? revisao.veiculo.id : "";
     document.getElementById("descricaoRevisao").value = revisao.descricao || "";
     document.getElementById("concluidaRevisao").checked = revisao.concluida || false;
+
+    // Armazenar data da revisão em memória (não exibir no formulário)
+    window.dataRevisaoEditando = revisao.dtRevisao || null;
 
     // Marcar tipos selecionados
     const checkboxes = document.querySelectorAll('#tiposRevisaoContainer input[type="checkbox"]');
@@ -610,3 +634,176 @@ document.getElementById("proximoRevisoes").addEventListener("click", () => {
 
 // Inicialização
 carregarProprietarios();
+
+// ==================== FUNCIONALIDADES DE AGENDAMENTOS ====================
+
+// Função para carregar revisões disponíveis para agendamento
+async function carregarRevisoesParaAgendamento() {
+  try {
+    const resposta = await fetch(`${REVISAO_API_URL}?page=0&size=1000&concluida=false`);
+    if (!resposta.ok) {
+      throw new Error("Erro ao carregar revisões");
+    }
+
+    const dados = await resposta.json();
+    const revisoes = dados.content;
+    const select = document.getElementById("revisaoAgendamento");
+
+    // Limpar opções existentes (exceto a primeira)
+    select.innerHTML = '<option value="">Selecione uma revisão</option>';
+
+    revisoes.forEach((revisao) => {
+      if (revisao.veiculo) {
+        const option = document.createElement("option");
+        option.value = revisao.id;
+        option.textContent = `${revisao.veiculo.veiculo} - ${revisao.veiculo.marca} (${revisao.descricao || "Sem descrição"})`;
+        select.appendChild(option);
+      }
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar revisões para agendamento:", erro);
+  }
+}
+
+// Event listener para o formulário de agendamentos
+document.getElementById("agendamentoForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const revisaoId = document.getElementById("revisaoAgendamento").value;
+  const dataAgendamento = document.getElementById("dataAgendamento").value;
+
+  if (!revisaoId || !dataAgendamento) {
+    alert("Por favor, preencha todos os campos");
+    return;
+  }
+
+  // Validar se a data não é no passado
+  const dataSelecionada = new Date(dataAgendamento);
+  const agora = new Date();
+
+  if (dataSelecionada <= agora) {
+    alert("A data do agendamento deve ser futura");
+    return;
+  }
+
+  try {
+    // Atualizar a revisão com a data de agendamento
+    const resposta = await fetch(`${REVISAO_API_URL}/${revisaoId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        dtRevisao: dataAgendamento,
+      }),
+    });
+
+    if (!resposta.ok) {
+      const erro = await resposta.json();
+      throw new Error(erro.message || "Erro ao agendar revisão");
+    }
+
+    alert("Agendamento realizado com sucesso!");
+    resetarFormularioAgendamento();
+    carregarAgendamentos();
+  } catch (erro) {
+    alert(`Erro ao agendar revisão: ${erro.message}`);
+  }
+});
+
+// Função para resetar formulário de agendamentos
+function resetarFormularioAgendamento() {
+  document.getElementById("revisaoAgendamento").value = "";
+  document.getElementById("dataAgendamento").value = "";
+}
+
+// Função para carregar agendamentos
+async function carregarAgendamentos() {
+  try {
+    const resposta = await fetch(`${REVISAO_API_URL}?page=0&size=1000`);
+    if (!resposta.ok) {
+      throw new Error("Erro ao carregar agendamentos");
+    }
+
+    const dados = await resposta.json();
+    const revisoes = dados.content;
+
+    const tabela = document.getElementById("tabelaAgendamentos");
+    tabela.innerHTML = "";
+
+    // Filtrar apenas revisões com data agendada
+    const revisoesAgendadas = revisoes.filter((revisao) => revisao.dtRevisao);
+
+    if (revisoesAgendadas.length === 0) {
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td colspan="2" style="text-align: center; padding: 20px; color: #666;">
+          Nenhum agendamento encontrado
+        </td>
+      `;
+      tabela.appendChild(linha);
+    } else {
+      // Ordenar por data de agendamento
+      revisoesAgendadas.sort((a, b) => new Date(a.dtRevisao) - new Date(b.dtRevisao));
+
+      revisoesAgendadas.forEach((revisao) => {
+        if (revisao.veiculo) {
+          const linha = document.createElement("tr");
+          const data = new Date(revisao.dtRevisao);
+          const dataFormatada = data.toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          const statusClass = revisao.concluida ? "status-concluida" : "status-pendente";
+          const status = revisao.concluida ? "Concluído" : "Pendente";
+
+          // Botão de editar desabilitado quando concluído
+          const botaoEditar = revisao.concluida
+            ? `<button onclick="editarAgendamento(${revisao.id})" disabled style="opacity: 0.5; cursor: not-allowed;">Editar</button>`
+            : `<button onclick="editarAgendamento(${revisao.id})">Editar</button>`;
+
+          linha.innerHTML = `
+            <td>${revisao.veiculo.veiculo} - ${revisao.veiculo.marca}</td>
+            <td>${dataFormatada}</td>
+            <td class="${statusClass}">${status}</td>
+            <td>
+              ${botaoEditar}
+            </td>
+          `;
+          tabela.appendChild(linha);
+        }
+      });
+    }
+  } catch (erro) {
+    alert(`Erro ao carregar agendamentos: ${erro.message}`);
+  }
+}
+
+// Função para editar agendamento
+async function editarAgendamento(id) {
+  try {
+    const resposta = await fetch(`${REVISAO_API_URL}/${id}`);
+    if (!resposta.ok) {
+      throw new Error("Erro ao carregar revisão");
+    }
+
+    const revisao = await resposta.json();
+    document.getElementById("revisaoAgendamento").value = revisao.id;
+
+    // Carregar data da revisão
+    if (revisao.dtRevisao) {
+      const data = new Date(revisao.dtRevisao);
+      const dataFormatada = data.toISOString().slice(0, 16); // Formato YYYY-MM-DDTHH:MM
+      document.getElementById("dataAgendamento").value = dataFormatada;
+    }
+
+    // Scroll para o formulário
+    document.getElementById("agendamentoForm").scrollIntoView({ behavior: "smooth" });
+  } catch (erro) {
+    alert(`Erro ao editar agendamento: ${erro.message}`);
+  }
+}
