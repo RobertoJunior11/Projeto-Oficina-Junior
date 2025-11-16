@@ -10,3 +10,4 @@ Site de oficina.
 - Cadastro e gerenciamento de clientes.
 - Controle de veículos e serviços.
 - Registro de ordens de serviço.
+- Agendamento de data e hora para a revisão.
