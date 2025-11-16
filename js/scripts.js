@@ -548,7 +548,7 @@ async function carregarRevisoes() {
           <td>${valorTotal}</td>
           <td class="${statusClass}">${concluida}</td>
           <td>
-            <button onclick="editarRevisao(${revisao.id})">Editar</button>
+            <button onclick="editarRevisao(${revisao.id})">Editar / Finalizar</button>
             <button onclick="deletarRevisao(${revisao.id})">Excluir</button>
           </td>
         `;
@@ -640,7 +640,7 @@ carregarProprietarios();
 // Função para carregar revisões disponíveis para agendamento
 async function carregarRevisoesParaAgendamento() {
   try {
-    const resposta = await fetch(`${REVISAO_API_URL}?page=0&size=1000&concluida=false`);
+    const resposta = await fetch(`${REVISAO_API_URL}?page=0&size=1000`);
     if (!resposta.ok) {
       throw new Error("Erro ao carregar revisões");
     }
